@@ -6,10 +6,10 @@ Life-planner (`~/0_Projects/life-planner`) ссылается на этот ре
 
 ## Структура
 
-- `data/current-phase.md` — **текущая фаза**: ккал, белок, период (читает Hermes утром, life-planner `/weekly`)
+- `data/sushka-2026.md` — **план сушки 2026**: цели по неделям, еженедельный трекинг (source of truth для целей и прогресса)
 - `data/logs/YYYY-MM.jsonl` — **факт по дням**: append-only лог nutrition (пишет Hermes вечером)
 - `data/structured/approach.md` — методология тренера Леры (учебник)
-- `data/structured/personal-progress.md` — прогресс по фазам
+- `data/structured/personal-progress.md` — исторический прогресс по фазам
 - `data/raw/` — сырые данные переписок
 - `docs/data-model.md` — контракт данных и схема `nutrition_log`
 - `docs/hermes-integration.md` — спека интеграции с Hermes

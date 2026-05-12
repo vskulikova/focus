@@ -6,11 +6,11 @@
 
 | Данные | Source of truth | Кто пишет | Кто читает |
 |---|---|---|---|
-| Методология сушки | `data/structured/approach.md` | Claude Code | Все ритуалы |
-| Текущая фаза (ккал, белок) | `data/current-phase.md` | Claude Code | Hermes (morning brief), life-planner (`/weekly`) |
+| Методология сушки | `data/structured/approach.md` | Claude Code | Справочник |
+| План сушки + трекинг | `data/sushka-2026.md` | Lera + Claude Code | Hermes (morning brief), life-planner (`/weekly`) |
 | Факт по дням | `data/logs/YYYY-MM.jsonl`, event `nutrition_log` | Hermes (вечерний приём отчёта) | life-planner (`/weekly` агрегация) |
 | Сырьё переписок | `data/raw/` | Manual | Claude Code (анализ) |
-| Прогресс по фазам | `data/structured/personal-progress.md` | Manual + `/weekly` | Анализ |
+| Исторический прогресс | `data/structured/personal-progress.md` | Manual | Архив |
 
 ## Nutrition Log Contract
 
@@ -37,20 +37,24 @@
 - если день пропущен — записи нет; weekly агрегация считает его «не залогирован», а не «0 ккал»;
 - timezone — локальный TZ устройства, которое пишет (oldmac).
 
-## Phase File Contract
+## Sushka Plan Contract
 
-Файл: `data/current-phase.md`.
+Файл: `data/sushka-2026.md` — единственный source of truth для плана.
 
-Обязательные секции:
-- `## Сейчас` — таблица или список с полями `Фаза`, `С даты`, `Калории`, `Белок`, `Учёт`.
-- `## История фаз` — таблица: Период / Ккал/день / Белок/день / Заметки.
+Структура:
+- Таблица прогноза — строки с диапазонами дат, целевыми ккал и прогнозом веса.
+- Секции `### Неделя N (даты)` — содержат `**Задание:**` и `**Отчёт:**`.
 
-Парсер Hermes извлекает «Сейчас» как dict для morning brief.
+Парсер для Hermes читает текущую неделю по дате:
+1. Найти строку в таблице, где сегодняшняя дата попадает в диапазон `Даты`.
+2. Найти секцию `### Неделя N` с соответствующими датами.
+3. Извлечь `**Задание:**` — получить ккал, белок и другие цели.
+4. Вернуть dict `{kcal, protein_g_min, phase, week_dates}`.
 
 ## Связь с life-planner
 
-`life-planner/planner_cli.py gather-weekly` импортирует focus и достаёт:
-- target из `current-phase.md`
+`life-planner/planner_cli.py gather-weekly` читает из focus:
+- цели текущей недели из `data/sushka-2026.md` (парсер по дате)
 - факты за неделю из `data/logs/*.jsonl` (по полю `kind=nutrition_log` и `date` в диапазоне недели)
 - агрегаты: `days_in_kcal_range`, `days_protein_ok`, `avg_kcal`, `avg_protein`, `days_missing`
 
